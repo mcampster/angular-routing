@@ -27,16 +27,16 @@ var $ScrollProvider = [
             '$window', 
             '$rootScope', 
             '$anchorScroll', 
-            '$injector', 
-            function ($window, $rootScope, $anchorScroll, $injector) {
+            '$inject', 
+            function ($window, $rootScope, $anchorScroll, $inject) {
                 var scroll = function (arg) {
-                    var fn;
+                    var ifn;
                     if(isUndefined(arg)) {
                         $anchorScroll();
                     } else if(isString(arg)) {
                         scrollTo(arg);
-                    } else if((fn = injectFn(arg)) !== null) {
-                        scrollTo(fn($injector));
+                    } else if(ifn = $inject.create(arg)) {
+                        scrollTo(ifn());
                     }
                 };
                 scroll.$current = 'top';
@@ -48,6 +48,8 @@ var $ScrollProvider = [
                     }
                     $rootScope.$broadcast('$scrollPositionChanged', elm);
                 }
+                //TODO: could we support mocking this way if it doesn't work out of the box?
+                //scroll.$fn = scroll;
                 return scroll;
             }        ];
     }
@@ -72,5 +74,5 @@ angular.module('dotjem.routing').provider('$scroll', $ScrollProvider);
 //scrollTo: top - scroll to top, explicitly stated.(This also enables one to override another scrollTo from a parent)
 //scrollTo: null - don't scroll, not even to top.
 //scrollTo: @viewname - scroll to a view.
-//    scrollTo: elementid - scroll to an element id
+//scrollTo: elementid - scroll to an element id
 //scrollTo: ['$stateParams', function($stateParams) { return stateParams.section; } - scroll to element with id or view if starts with @

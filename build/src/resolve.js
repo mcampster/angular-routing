@@ -17,8 +17,8 @@ var $ResolveProvider = [
         */
         this.$get = [
             '$q', 
-            '$injector', 
-            function ($q, $injector) {
+            '$inject', 
+            function ($q, $inject) {
                 var $service = {
                 };
                 var cache = {
@@ -84,8 +84,8 @@ var $ResolveProvider = [
                             if(!(key in cache)) {
                                 if(isString(value)) {
                                     cache[key] = angular.isString(value);
-                                } else if((ifn = injectFn(value)) != null) {
-                                    cache[key] = ifn($injector, extend({
+                                } else if(ifn = $inject.create(value)) {
+                                    cache[key] = ifn(extend({
                                     }, locals, scoped));
                                 }
                             }

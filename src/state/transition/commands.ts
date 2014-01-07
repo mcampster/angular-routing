@@ -135,7 +135,7 @@ var cmd = {
         };
     },
 
-    beginTransaction: function ($view, $injector): ICommand {
+    beginTransaction: function ($view, $inject: dotjem.routing.IInjectService): ICommand {
         return function (context: Context) {
             context.transaction = $view.beginUpdate();
             context.transaction.clear();
@@ -144,10 +144,10 @@ var cmd = {
             forEach(context.changed.array, function (change) {
                 updating = updating || change.isChanged;
                 forEach(change.state.views, function (view, name) {
-                    var fn;
+                    var ifn: dotjem.routing.IInvoker;
                     if (isDefined(view.sticky)) {
-                        if (fn = injectFn(view.sticky)) {
-                            view.sticky = fn($injector, { $to: context.toState, $from: context.$state.current });
+                        if (ifn = $inject.create(view.sticky)) {
+                            view.sticky = ifn({ $to: context.toState, $from: context.$state.current });
                         } else if (!isString(view.sticky)) {
                             view.sticky = change.state.fullname;
                         }

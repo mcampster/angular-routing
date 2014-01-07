@@ -177,14 +177,14 @@ var $StateProvider = [
         this.$get = [
             '$rootScope', 
             '$q', 
-            '$injector', 
+            '$inject', 
             '$route', 
             '$view', 
             '$stateTransition', 
             '$location', 
             '$scroll', 
             '$resolve', 
-            function ($rootScope, $q, $injector, $route, $view, $transition, $location, $scroll, $resolve) {
+            function ($rootScope, $q, $inject, $route, $view, $transition, $location, $scroll, $resolve) {
                 /**
                 * @ngdoc object
                 * @name dotjem.routing.$state
@@ -535,7 +535,7 @@ var $StateProvider = [
                         };
                     }).execute(cmd.createEmitter($transition)).execute(cmd.buildChanges(forceReload)).execute(cmd.createTransition(goto)).execute(function () {
                         forceReload = null;
-                    }).execute(cmd.raiseUpdate($rootScope)).execute(cmd.updateRoute($route, args.updateroute)).execute(cmd.beginTransaction($view, $injector)).execute(cmd.before()).execute(function (context) {
+                    }).execute(cmd.raiseUpdate($rootScope)).execute(cmd.updateRoute($route, args.updateroute)).execute(cmd.beginTransaction($view, $inject)).execute(cmd.before()).execute(function (context) {
                         if($rootScope.$broadcast(EVENTS.STATE_CHANGE_START, context.toState, $state.current).defaultPrevented) {
                             context.abort();
                         }

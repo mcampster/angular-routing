@@ -317,7 +317,7 @@ function $StateTransitionProvider() {
 
             validate(from, to);
 
-            if (injectFn(handler)) { // angular.isFunction(handler) || angular.isArray(handler)) {
+            if (isInjectable(handler)) { // angular.isFunction(handler) || angular.isArray(handler)) {
                 handler = { between: handler };
             }
 
@@ -374,8 +374,8 @@ function $StateTransitionProvider() {
      * @description
      * See {@link dotjem.routing.$stateTransitionProvider $stateTransitionProvider} for details on how to configure transitions.
      */
-    this.$get = [<any>'$q', '$injector',
-    function ($q: ng.IQService, $injector: ng.auto.IInjectorService) {
+    this.$get = [<any>'$q', '$inject',
+    function ($q: ng.IQService, $inject: dotjem.routing.IInjectService) {
 
         var $transition: any = {
             root: root,
@@ -393,7 +393,8 @@ function $StateTransitionProvider() {
                 var handler;
                 forEach(handlers, (handlerObj) => {
                     if (isDefined(handler = select(handlerObj))) {
-                        injectFn(handler)($injector, {
+                        //TODO: Cache handler.
+                        $inject.create(handler)({
                             $to: to,
                             $from: from,
                             $transition: tc,

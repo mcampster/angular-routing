@@ -31,18 +31,26 @@ function inherit(parent, extra) {
 function toName(named) {
     return isString(named) ? named : named.$fullname || named.fullname;
 }
-function injectFn(arg) {
-    if(isFunction(arg)) {
-        return function (injector, locals) {
-            return injector.invoke(arg, arg, locals);
-        };
-    } else if(isArray(arg)) {
-        var fn = arg[arg.length - 1];
-        return function (injector, locals) {
-            return injector.invoke(arg, fn, locals);
-        };
+function isArrayAnnotatedFunction(array) {
+    if(!isArray(array)) {
+        return false;
     }
-    return null;
+    var error = Error('Incorrect injection annotation! Expected an array of strings with the last element as a function');
+    for(var i = 0, l = array.length; i < l; i++) {
+        if(i < l - 1) {
+            if(!isString(array[i])) {
+                throw error;
+            }
+        } else if(!isFunction(array[i])) {
+            if(!isString(array[i])) {
+                throw error;
+            }
+        }
+    }
+    return true;
+}
+function isInjectable(fn) {
+    return isArrayAnnotatedFunction(fn) || isFunction(fn);
 }
 function buildParams(all, path, search) {
     var par = copy(all || {
@@ -1088,7 +1096,7 @@ function $StateTransitionProvider() {
                 return this;
             }
             validate(from, to);
-            if(injectFn(handler)) {
+            if(isInjectable(handler)) {
                 // angular.isFunction(handler) || angular.isArray(handler)) {
                 handler = {
                     between: handler
@@ -1141,8 +1149,8 @@ function $StateTransitionProvider() {
     */
     this.$get = [
         '$q', 
-        '$injector', 
-        function ($q, $injector) {
+        '$inject', 
+        function ($q, $inject) {
             var $transition = {
                 root: root,
                 find: find
@@ -1154,7 +1162,8 @@ function $StateTransitionProvider() {
                     var handler;
                     forEach(handlers, function (handlerObj) {
                         if(isDefined(handler = select(handlerObj))) {
-                            injectFn(handler)($injector, {
+                            //TODO: Cache handler.
+                            $inject.create(handler)({
                                 $to: to,
                                 $from: from,
                                 $transition: tc,
@@ -1414,14 +1423,14 @@ var $StateProvider = [
         this.$get = [
             '$rootScope', 
             '$q', 
-            '$injector', 
+            '$inject', 
             '$route', 
             '$view', 
             '$stateTransition', 
             '$location', 
             '$scroll', 
             '$resolve', 
-            function ($rootScope, $q, $injector, $route, $view, $transition, $location, $scroll, $resolve) {
+            function ($rootScope, $q, $inject, $route, $view, $transition, $location, $scroll, $resolve) {
                 /**
                 * @ngdoc object
                 * @name dotjem.routing.$state
@@ -1772,7 +1781,7 @@ var $StateProvider = [
                         };
                     }).execute(cmd.createEmitter($transition)).execute(cmd.buildChanges(forceReload)).execute(cmd.createTransition(goto)).execute(function () {
                         forceReload = null;
-                    }).execute(cmd.raiseUpdate($rootScope)).execute(cmd.updateRoute($route, args.updateroute)).execute(cmd.beginTransaction($view, $injector)).execute(cmd.before()).execute(function (context) {
+                    }).execute(cmd.raiseUpdate($rootScope)).execute(cmd.updateRoute($route, args.updateroute)).execute(cmd.beginTransaction($view, $inject)).execute(cmd.before()).execute(function (context) {
                         if($rootScope.$broadcast(EVENTS.STATE_CHANGE_START, context.toState, $state.current).defaultPrevented) {
                             context.abort();
                         }
@@ -1835,8 +1844,8 @@ var $ResolveProvider = [
         */
         this.$get = [
             '$q', 
-            '$injector', 
-            function ($q, $injector) {
+            '$inject', 
+            function ($q, $inject) {
                 var $service = {
                 };
                 var cache = {
@@ -1902,8 +1911,8 @@ var $ResolveProvider = [
                             if(!(key in cache)) {
                                 if(isString(value)) {
                                     cache[key] = angular.isString(value);
-                                } else if((ifn = injectFn(value)) != null) {
-                                    cache[key] = ifn($injector, extend({
+                                } else if(ifn = $inject.create(value)) {
+                                    cache[key] = ifn(extend({
                                     }, locals, scoped));
                                 }
                             }
@@ -2561,16 +2570,16 @@ var $ScrollProvider = [
             '$window', 
             '$rootScope', 
             '$anchorScroll', 
-            '$injector', 
-            function ($window, $rootScope, $anchorScroll, $injector) {
+            '$inject', 
+            function ($window, $rootScope, $anchorScroll, $inject) {
                 var scroll = function (arg) {
-                    var fn;
+                    var ifn;
                     if(isUndefined(arg)) {
                         $anchorScroll();
                     } else if(isString(arg)) {
                         scrollTo(arg);
-                    } else if((fn = injectFn(arg)) !== null) {
-                        scrollTo(fn($injector));
+                    } else if(ifn = $inject.create(arg)) {
+                        scrollTo(ifn());
                     }
                 };
                 scroll.$current = 'top';
@@ -2582,6 +2591,8 @@ var $ScrollProvider = [
                     }
                     $rootScope.$broadcast('$scrollPositionChanged', elm);
                 }
+                //TODO: could we support mocking this way if it doesn't work out of the box?
+                //scroll.$fn = scroll;
                 return scroll;
             }        ];
     }
@@ -2606,8 +2617,105 @@ angular.module('dotjem.routing').provider('$scroll', $ScrollProvider);
 //scrollTo: top - scroll to top, explicitly stated.(This also enables one to override another scrollTo from a parent)
 //scrollTo: null - don't scroll, not even to top.
 //scrollTo: @viewname - scroll to a view.
-//    scrollTo: elementid - scroll to an element id
+//scrollTo: elementid - scroll to an element id
 //scrollTo: ['$stateParams', function($stateParams) { return stateParams.section; } - scroll to element with id or view if starts with @
+
+var $InjectProvider = [
+    function () {
+        'use strict';
+        this.$get = [
+            '$injector', 
+            function ($injector) {
+                function createInvoker(fn) {
+                    if(isInjectable(fn)) {
+                        var injector = new InjectFn(fn, $injector);
+                        return function (locals) {
+                            return injector.invoker(locals);
+                        };
+                    }
+                    return null;
+                }
+                return {
+                    get: //Note: Rerouting of injector functions in cases where those are move convinient.
+                    $injector.get,
+                    annotate: $injector.annotate,
+                    instantiate: $injector.instantiate,
+                    invoke: $injector.invoke,
+                    accepts: isInjectable,
+                    create: createInvoker
+                };
+            }        ];
+    }
+];
+angular.module('dotjem.routing').provider('$inject', $InjectProvider);
+//Note: All parts that has been commented out here is purpously left there as they are for a later optimization.
+//      of all internal inject handlers.
+var InjectFn = (function () {
+    //private invokerFn: dotjem.routing.IInvoker;
+    function InjectFn(fn, $inject) {
+        this.fn = fn;
+        this.$inject = $inject;
+        //var last;
+        if(isArray(fn)) {
+            //last = fn.length - 1;
+            //this.func = fn[last];
+            this.func = fn[fn.length - 1];
+            //this.dependencies = fn.slice(0, last);
+                    } else if(isFunction(fn)) {
+            this.func = fn;
+            //if (fn.$inject) {
+            //    this.dependencies = fn.$inject;
+            //} else {
+            //    this.dependencies = this.extractDependencies(fn);
+            //}
+                    }
+    }
+    InjectFn.FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    InjectFn.FN_ARG_SPLIT = /,/;
+    InjectFn.FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
+    InjectFn.STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+    InjectFn.prototype.invoker = //private extractDependencies(fn: any) {
+    //    var fnText,
+    //        argDecl,
+    //        deps = [];
+    //    if (fn.length) {
+    //        fnText = fn.toString().replace(InjectFn.STRIP_COMMENTS, '');
+    //        argDecl = fnText.match(InjectFn.FN_ARGS);
+    //        forEach(argDecl[1].split(InjectFn.FN_ARG_SPLIT), function (arg) {
+    //            arg.replace(InjectFn.FN_ARG, function (all, underscore, name) {
+    //                deps.push(name);
+    //            });
+    //        });
+    //    }
+    //    return deps;
+    //}
+    function (locals) {
+        return this.$inject.invoke(this.fn, this.func, locals);
+        //Note: This part does not work, nor is it optimized as it should.
+        //      generally when creating a handler through here locals are static meaning we can predict how the arg
+        //      array should be resolved, therefore we can cache all services we require from the injector and just
+        //      patch in locals on calls.
+        //
+        //if (this.invokerFn == null) {
+        //    this.invokerFn = (locals?: any) => {
+        //        var args = [];
+        //        var l = this.dependencies.length;
+        //        var i = 0, key;
+        //        for (; i < length; i++) {
+        //            key = this.dependencies[i];
+        //            args.push(
+        //              locals && locals.hasOwnProperty(key)
+        //              ? locals[key]
+        //              : this.$inject.get(key)
+        //            );
+        //        }
+        //        return this.func.apply(self, args);
+        //    };
+        //}
+        //return this.invokerFn(locals);
+            };
+    return InjectFn;
+})();
 
 /// <reference path="../../lib/angular/angular-1.0.d.ts" />
 /// <reference path="../common.ts" />
@@ -3117,7 +3225,7 @@ var cmd = {
             }
         };
     },
-    beginTransaction: function ($view, $injector) {
+    beginTransaction: function ($view, $inject) {
         return function (context) {
             context.transaction = $view.beginUpdate();
             context.transaction.clear();
@@ -3125,10 +3233,10 @@ var cmd = {
             forEach(context.changed.array, function (change) {
                 updating = updating || change.isChanged;
                 forEach(change.state.views, function (view, name) {
-                    var fn;
+                    var ifn;
                     if(isDefined(view.sticky)) {
-                        if(fn = injectFn(view.sticky)) {
-                            view.sticky = fn($injector, {
+                        if(ifn = $inject.create(view.sticky)) {
+                            view.sticky = ifn({
                                 $to: context.toState,
                                 $from: context.$state.current
                             });

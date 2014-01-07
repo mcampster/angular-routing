@@ -2,6 +2,15 @@
 
 module dotjem.routing {
 
+    interface IInjectService extends ng.auto.IInjectorService {
+        accepts(fn: any): bool;
+        create(fn): IInvoker;
+    }
+
+    interface IInvoker {
+        (locals?: any): any;
+    }
+
     interface IView {
         template?: any;
         controller?: any;

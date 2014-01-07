@@ -120,7 +120,7 @@ var cmd = {
             }
         };
     },
-    beginTransaction: function ($view, $injector) {
+    beginTransaction: function ($view, $inject) {
         return function (context) {
             context.transaction = $view.beginUpdate();
             context.transaction.clear();
@@ -128,10 +128,10 @@ var cmd = {
             forEach(context.changed.array, function (change) {
                 updating = updating || change.isChanged;
                 forEach(change.state.views, function (view, name) {
-                    var fn;
+                    var ifn;
                     if(isDefined(view.sticky)) {
-                        if(fn = injectFn(view.sticky)) {
-                            view.sticky = fn($injector, {
+                        if(ifn = $inject.create(view.sticky)) {
+                            view.sticky = ifn({
                                 $to: context.toState,
                                 $from: context.$state.current
                             });

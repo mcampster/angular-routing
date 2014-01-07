@@ -308,7 +308,7 @@ function $StateTransitionProvider() {
                 return this;
             }
             validate(from, to);
-            if(injectFn(handler)) {
+            if(isInjectable(handler)) {
                 // angular.isFunction(handler) || angular.isArray(handler)) {
                 handler = {
                     between: handler
@@ -361,8 +361,8 @@ function $StateTransitionProvider() {
     */
     this.$get = [
         '$q', 
-        '$injector', 
-        function ($q, $injector) {
+        '$inject', 
+        function ($q, $inject) {
             var $transition = {
                 root: root,
                 find: find
@@ -374,7 +374,8 @@ function $StateTransitionProvider() {
                     var handler;
                     forEach(handlers, function (handlerObj) {
                         if(isDefined(handler = select(handlerObj))) {
-                            injectFn(handler)($injector, {
+                            //TODO: Cache handler.
+                            $inject.create(handler)({
                                 $to: to,
                                 $from: from,
                                 $transition: tc,

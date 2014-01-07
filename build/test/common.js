@@ -22,18 +22,26 @@ function inherit(parent, extra) {
 function toName(named) {
     return isString(named) ? named : named.$fullname || named.fullname;
 }
-function injectFn(arg) {
-    if(isFunction(arg)) {
-        return function (injector, locals) {
-            return injector.invoke(arg, arg, locals);
-        };
-    } else if(isArray(arg)) {
-        var fn = arg[arg.length - 1];
-        return function (injector, locals) {
-            return injector.invoke(arg, fn, locals);
-        };
+function isArrayAnnotatedFunction(array) {
+    if(!isArray(array)) {
+        return false;
     }
-    return null;
+    var error = Error('Incorrect injection annotation! Expected an array of strings with the last element as a function');
+    for(var i = 0, l = array.length; i < l; i++) {
+        if(i < l - 1) {
+            if(!isString(array[i])) {
+                throw error;
+            }
+        } else if(!isFunction(array[i])) {
+            if(!isString(array[i])) {
+                throw error;
+            }
+        }
+    }
+    return true;
+}
+function isInjectable(fn) {
+    return isArrayAnnotatedFunction(fn) || isFunction(fn);
 }
 function buildParams(all, path, search) {
     var par = copy(all || {
