@@ -13,11 +13,11 @@ module.exports = function (grunt) {
         typescript: {
             src: {
                 src: ['src/**/*.ts'],
-                dest: 'build/src',
+                dest: 'build',
                 options: {
                     module: 'commonjs',
                     target: 'es5',
-                    base_path: 'src',
+                    base_path: '',
                     sourcemap: false,
                     declaration: true,
                     comments: true
@@ -25,11 +25,11 @@ module.exports = function (grunt) {
             },
             test: {
                 src: ['test/**/*.ts'],
-                dest: 'build/test',
+                dest: 'build',
                 options: {
                     module: 'commonjs',
                     target: 'es5',
-                    base_path: 'test',
+                    base_path: '',
                     sourcemap: false,
                     declaration: false,
                     comments: true
