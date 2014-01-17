@@ -1,4 +1,4 @@
-/// <reference path="../lib/angular/angular-1.0.d.ts" />
+/// <reference path="refs.d.ts" />
 
 /*jshint globalstrict:true*/
 /*global angular:false*/
@@ -67,7 +67,7 @@ interface IParam {
     args: string;
     index: number;
     lastIndex: number;
-    catchAll: bool;
+    catchAll: boolean;
 }
 
 function buildParams(all?, path?, search?) {

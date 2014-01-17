@@ -1,7 +1,7 @@
 /// <reference path="../../refs.d.ts" />
 
 interface IContext {
-    begin(): ng.IPromise;
+    begin(): ng.IPromise<any>;
 }
 
 interface ITransition {
@@ -10,7 +10,7 @@ interface ITransition {
 }
 
 interface IStage {
-    execute(context: IContext): ng.IPromise;
+    execute(context: IContext): ng.IPromise<any>;
 }
 
 interface IStageFactory {
@@ -18,7 +18,7 @@ interface IStageFactory {
 }
 
 interface IFactory {
-    create(state: any, params: any, updateroute?: bool): ITransition;
+    create(state: any, params: any, updateroute?: boolean): ITransition;
 }
 
 
@@ -29,7 +29,7 @@ class Factory implements IFactory {
 
     constructor(public inject: ng.auto.IInjectorService, private q: ng.IQService) { }
 
-    public create(state: any, params: any, updateroute?: bool) : ITransition {
+    public create(state: any, params: any, updateroute?: boolean) : ITransition {
         var trans = new Transition(state, params, updateroute);
         forEach(this.factories,  (fac: IStageFactory) => {
             //TODO: Use injection.
@@ -43,7 +43,7 @@ class Factory implements IFactory {
 class Transition implements ITransition {
     stages: IStage[] = [];
 
-    constructor(private state: any, private params: any, private updateroute?: bool) {
+    constructor(private state: any, private params: any, private updateroute?: boolean) {
 
     }
 
@@ -52,7 +52,7 @@ class Transition implements ITransition {
     }
 
     public execute(context: IContext): ITransition {
-        var q: ng.IPromise = context.begin();
+        var q: ng.IPromise<any> = context.begin();
         forEach(this.stages, function (stage: IStage) {
             q = q.then(function () {
                 return stage.execute(context);

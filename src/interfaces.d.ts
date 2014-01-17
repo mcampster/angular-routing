@@ -1,9 +1,7 @@
-/// <reference path="../lib/angular/angular-1.0.d.ts" />
-
-module dotjem.routing {
+declare module dotjem.routing {
 
     interface IInjectService extends ng.auto.IInjectorService {
-        accepts(fn: any): bool;
+        accepts(fn: any): boolean;
         create(fn): IInvoker;
     }
 
@@ -19,7 +17,7 @@ module dotjem.routing {
     }
     
     interface IStoredView extends IView {
-        template?: ng.IPromise;
+        template?: ng.IPromise<any>;
         version: number;
     }
 
@@ -30,7 +28,7 @@ module dotjem.routing {
     interface IViewTransaction extends IViewServiceBase {
         commit();
         cancel();
-        completed: bool;
+        completed: boolean;
 
         prepUpdate(name: string, args: IView): (locals?: any) => IViewServiceBase;
         prepCreate(name: string, args: IView): (locals?: any) => IViewServiceBase;
@@ -54,22 +52,23 @@ module dotjem.routing {
     }
 
     interface ITemplateService {
-        get (template: string): ng.IPromise;
-        get (template: (...args: any[]) => any): ng.IPromise;
-        get (template: { url: string; fn: (...args: any[]) => any; html: string; }): ng.IPromise;
+        get (template: string): ng.IPromise<any>;
+        get (template: (...args: any[]) => any): ng.IPromise<any>;
+        get (template: { url: string; fn: (...args: any[]) => any; html: string; }): ng.IPromise<any>;
     }
 
     interface IRoute {
         state?: string;
         action?: (...args: any[]) => any;
         redirectTo?: any;
-        reloadOnSearch: bool;
+        reloadOnSearch: boolean;
     }
 
     interface IRouteProvider {
         when(path: string, route: any): IWhenRouteProvider;
         when(path: string, route: IRoute): IWhenRouteProvider;
 
+        convert(name: string, converter: (arg: any) => any): IRouteProvider;
         convert(name: string, converter: (...args: any[]) => any): IRouteProvider;
 
         decorate(name: string, decorator: (...args: any[]) => any): IRouteProvider;
@@ -87,15 +86,15 @@ module dotjem.routing {
     
     interface IRouteService {
         reload: () => void;
-        change: (args: { route: string; params?: any; replace?: bool; }) => void;
-        format: (route: string, params?: any, base?: bool) => string;
+        change: (args: { route: string; params?: any; replace?: boolean; }) => void;
+        format: (route: string, params?: any, base?: boolean) => string;
         current?: any;
     }
 
     interface IState {
         children?: any;
         route?: string;
-        reloadOnSearch?: bool;
+        reloadOnSearch?: boolean;
 
         onEnter?: any;
         onExit?: any;
@@ -133,11 +132,11 @@ module dotjem.routing {
         goto(state: string, params?: any);
         goto(state: any, params?: any);
 
-        url(base?: bool);
-        url(state?: string, base?: bool);
-        url(state?: string, params?: any, base?: bool);
-        url(state?: any, base?: bool);
-        url(state?: any, params?: any, base?: bool);
+        url(base?: boolean);
+        url(state?: string, base?: boolean);
+        url(state?: string, params?: any, base?: boolean);
+        url(state?: any, base?: boolean);
+        url(state?: any, params?: any, base?: boolean);
 
         is(state?: string);
         is(state?: any);

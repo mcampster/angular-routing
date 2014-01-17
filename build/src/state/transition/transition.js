@@ -1,3 +1,5 @@
+/// <reference path="../../refs.d.ts" />
+
 //TODO: stateTransition.create should be surfice for the factory.
 var Factory = (function () {
     function Factory(inject, q) {
@@ -16,6 +18,7 @@ var Factory = (function () {
     };
     return Factory;
 })();
+
 var Transition = (function () {
     function Transition(state, params, updateroute) {
         this.state = state;
@@ -26,6 +29,7 @@ var Transition = (function () {
     Transition.prototype.push = function (stage) {
         this.stages.push(stage);
     };
+
     Transition.prototype.execute = function (context) {
         var q = context.begin();
         forEach(this.stages, function (stage) {
@@ -33,6 +37,7 @@ var Transition = (function () {
                 return stage.execute(context);
             });
         });
+
         return this;
     };
     return Transition;

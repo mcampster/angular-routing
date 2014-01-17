@@ -19,7 +19,7 @@ module.exports = function (grunt) {
                     target: 'es5',
                     base_path: 'src',
                     sourcemap: false,
-                    declaration: false,
+                    declaration: true,
                     comments: true
                 }
             },
@@ -68,9 +68,9 @@ module.exports = function (grunt) {
                 dest: 'build/<%= pkg.name %>.js'
             },
             legacy: {
-                src: ['build/src/legacy/prefix',
-                        'build/src/legacy/templateDecorator.js',
-                        'build/src/legacy/suffix'
+                src: ['src/legacy/prefix',
+                      'build/src/legacy/templateDecorator.js',
+                      'src/legacy/suffix'
                 ],
                 dest: 'build/<%= pkg.name %>.legacy.js'
             }
@@ -166,7 +166,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-copy');

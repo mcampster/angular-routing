@@ -1,11 +1,13 @@
-var $InjectProvider = [
-    function () {
+/// <reference path="refs.d.ts" />
+
+var $InjectProvider = [function () {
         'use strict';
+
         this.$get = [
-            '$injector', 
+            '$injector',
             function ($injector) {
                 function createInvoker(fn) {
-                    if(isInjectable(fn)) {
+                    if (isInjectable(fn)) {
                         var injector = new InjectFn(fn, $injector);
                         return function (locals) {
                             return injector.invoker(locals);
@@ -13,19 +15,20 @@ var $InjectProvider = [
                     }
                     return null;
                 }
+
                 return {
-                    get: //Note: Rerouting of injector functions in cases where those are move convinient.
-                    $injector.get,
+                    //Note: Rerouting of injector functions in cases where those are move convinient.
+                    get: $injector.get,
                     annotate: $injector.annotate,
                     instantiate: $injector.instantiate,
                     invoke: $injector.invoke,
                     accepts: isInjectable,
                     create: createInvoker
                 };
-            }        ];
-    }
-];
+            }];
+    }];
 angular.module('dotjem.routing').provider('$inject', $InjectProvider);
+
 //Note: All parts that has been commented out here is purpously left there as they are for a later optimization.
 //      of all internal inject handlers.
 var InjectFn = (function () {
@@ -34,25 +37,21 @@ var InjectFn = (function () {
         this.fn = fn;
         this.$inject = $inject;
         //var last;
-        if(isArray(fn)) {
+        if (isArray(fn)) {
             //last = fn.length - 1;
             //this.func = fn[last];
             this.func = fn[fn.length - 1];
             //this.dependencies = fn.slice(0, last);
-                    } else if(isFunction(fn)) {
+        } else if (isFunction(fn)) {
             this.func = fn;
             //if (fn.$inject) {
             //    this.dependencies = fn.$inject;
             //} else {
             //    this.dependencies = this.extractDependencies(fn);
             //}
-                    }
+        }
     }
-    InjectFn.FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
-    InjectFn.FN_ARG_SPLIT = /,/;
-    InjectFn.FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
-    InjectFn.STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
-    InjectFn.prototype.invoker = //private extractDependencies(fn: any) {
+    //private extractDependencies(fn: any) {
     //    var fnText,
     //        argDecl,
     //        deps = [];
@@ -67,7 +66,7 @@ var InjectFn = (function () {
     //    }
     //    return deps;
     //}
-    function (locals) {
+    InjectFn.prototype.invoker = function (locals) {
         return this.$inject.invoke(this.fn, this.func, locals);
         //Note: This part does not work, nor is it optimized as it should.
         //      generally when creating a handler through here locals are static meaning we can predict how the arg
@@ -91,6 +90,10 @@ var InjectFn = (function () {
         //    };
         //}
         //return this.invokerFn(locals);
-            };
+    };
+    InjectFn.FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    InjectFn.FN_ARG_SPLIT = /,/;
+    InjectFn.FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
+    InjectFn.STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
     return InjectFn;
 })();
