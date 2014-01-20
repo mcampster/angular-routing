@@ -52,9 +52,13 @@ declare module dotjem.routing {
     }
 
     interface ITemplateService {
-        get (template: string): ng.IPromise<any>;
-        get (template: (...args: any[]) => any): ng.IPromise<any>;
-        get (template: { url: string; fn: (...args: any[]) => any; html: string; }): ng.IPromise<any>;
+        (template: string): ng.IPromise<any>;
+        (template: (...args: any[]) => any): ng.IPromise<any>;
+        (template: { url: string; fn: (...args: any[]) => any; html: string; }): ng.IPromise<any>;
+
+        fn(template: string): ng.IPromise<any>;
+        fn(template: (...args: any[]) => any): ng.IPromise<any>;
+        fn(template: { url: string; fn: (...args: any[]) => any; html: string; }): ng.IPromise<any>;
     }
 
     interface IRoute {

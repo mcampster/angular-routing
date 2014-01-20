@@ -9,7 +9,7 @@ describe('$view', function () {
             template = $template;
             scope = $rootScope;
 
-            spyOn(template, 'get').andCallFake(function (value) {
+            spyOn(template, 'fn').andCallFake(function (value) {
                 return value.html;
             });
         };

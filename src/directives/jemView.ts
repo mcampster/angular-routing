@@ -68,7 +68,7 @@ var jemViewDirective = [<any>'$state', '$compile', '$controller', '$view', '$ani
                         name = attr['jemView'] || attr.name,
                         onloadExp = attr.onload || '',
                         version = -1,
-                        loader = (attr.loader && $template.get(attr.loader)) || null,
+                        loader = (attr.loader && $template(attr.loader)) || null,
                         activeLoader: JQuery;
 
                     scope.$on(EVENTS.VIEW_UPDATE, function (event, updatedName) {

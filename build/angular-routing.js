@@ -2079,14 +2079,12 @@ function $TemplateProvider() {
                 throw new Error("Template must be either an url as string, function or a object defining either url, fn or html.");
             };
 
-            //var $template = function(template): ng.IPromise<any> {
-            //    return $template.get(template);
-            //};
-            //$template["get"] = getter;
-            var $template = {
-                'get': getter
+            //Note: We return $template as a function.
+            //      However, to ease mocking we
+            var $template = function (template) {
+                return $template.fn(template);
             };
-
+            $template.fn = getter;
             return $template;
         }];
 }
@@ -2273,7 +2271,7 @@ function $ViewProvider() {
                 //TODO: Should we make this latebound so only views actually used gets loaded and rendered?
                 //      also we obtain the actual template even if it's an update for a sticky view, while the "cache" takes
                 //      largely care of this, it could be an optimization to not do this?
-                views[name].template = $template.get(template);
+                views[name].template = $template(template);
                 views[name].controller = controller;
                 views[name].locals = locals;
 
@@ -2325,7 +2323,7 @@ function $ViewProvider() {
                 if (!containsView(views, name)) {
                     views[name] = {
                         //TODO: Should we make this latebound so only views actually used gets loaded and rendered?
-                        template: $template.get(template),
+                        template: $template(template),
                         controller: controller,
                         locals: locals,
                         sticky: sticky,
@@ -3478,7 +3476,7 @@ var jemViewDirective = [
             transclude: 'element',
             compile: function (element, attr, linker) {
                 return function (scope, element, attr) {
-                    var viewScope, viewElement, name = attr['jemView'] || attr.name, onloadExp = attr.onload || '', version = -1, loader = (attr.loader && $template.get(attr.loader)) || null, activeLoader;
+                    var viewScope, viewElement, name = attr['jemView'] || attr.name, onloadExp = attr.onload || '', version = -1, loader = (attr.loader && $template(attr.loader)) || null, activeLoader;
 
                     scope.$on(EVENTS.VIEW_UPDATE, function (event, updatedName) {
                         if (updatedName === name) {

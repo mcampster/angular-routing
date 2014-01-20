@@ -88,14 +88,12 @@ function $TemplateProvider() {
                 throw new Error("Template must be either an url as string, function or a object defining either url, fn or html.");
             };
 
-            //var $template = function(template): ng.IPromise<any> {
-            //    return $template.get(template);
-            //};
-            //$template["get"] = getter;
-            var $template = {
-                'get': getter
+            //Note: We return $template as a function.
+            //      However, to ease mocking we
+            var $template = function (template) {
+                return $template.fn(template);
             };
-
+            $template.fn = getter;
             return $template;
         }];
 }
