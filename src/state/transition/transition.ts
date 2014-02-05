@@ -21,7 +21,25 @@ interface IFactory {
     create(state: any, params: any, updateroute?: boolean): ITransition;
 }
 
+interface IStateTransition {
+    locals: any;
+    canceled: boolean;
+    cancelReason: any;
+    cancel: (reason?: any) => void;
+    goto: (state: any, params?: any) => void;
+}
 
+//var trx = {
+//    locals: context.locals,
+//    canceled: false,
+//    cancel: function () {
+//        trx.canceled = true;
+//    },
+//    goto: function (state, params?) {
+//        trx.canceled = true;
+//        gotofn({ state: state, params: { all: params }, updateroute: true });
+//    }
+//};
 
 //TODO: stateTransition.create should be surfice for the factory.
 class Factory implements IFactory {
@@ -33,7 +51,7 @@ class Factory implements IFactory {
         var trans = new Transition(state, params, updateroute);
         forEach(this.factories,  (fac: IStageFactory) => {
             //TODO: Use injection.
-            var stage = null;
+            //var stage = null;
             trans.push(fac());
         });
         return trans;
@@ -42,10 +60,9 @@ class Factory implements IFactory {
 
 class Transition implements ITransition {
     stages: IStage[] = [];
+    constructor(private state: any, private params: any, private updateroute?: boolean) { }
 
-    constructor(private state: any, private params: any, private updateroute?: boolean) {
 
-    }
 
     public push(stage: IStage) {
         this.stages.push(stage);
