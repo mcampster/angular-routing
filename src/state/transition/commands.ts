@@ -50,7 +50,7 @@ var cmd = {
                 },
                 goto: function (state, params?) {
                     trx.canceled = true;
-                    gotofn({ state: state, params: { all: params }, updateroute: true });
+                    gotofn({ state: state, params: { $all: params }, updateroute: true });
                 }
             };
             context.transition = trx;
