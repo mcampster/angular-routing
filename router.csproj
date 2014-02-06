@@ -167,9 +167,6 @@
     <Content Include="lib\jquery\impl\jquery-1.9.1.min.js" />
     <Content Include="lib\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="src\common.ts" />
-    <Content Include="src\common.js">
-      <DependentUpon>common.ts</DependentUpon>
-    </Content>
     <TypeScriptCompile Include="src\directives\jemView.ts" />
     <TypeScriptCompile Include="src\legacy\templateDecorator.ts" />
     <TypeScriptCompile Include="src\interfaces.d.ts" />

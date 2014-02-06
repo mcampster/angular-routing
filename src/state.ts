@@ -532,6 +532,8 @@ var $StateProvider = [<any>'$routeProvider', '$stateTransitionProvider', functio
                 scrollTo,
                 useUpdate = false;
 
+            
+
             if (!running.ended) {
                 running.abort();
             }
