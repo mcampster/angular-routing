@@ -518,6 +518,7 @@ var $StateProvider = [
                 function goto(args) {
                     var ctx, scrollTo, useUpdate = false;
 
+                    //$transition.create(args.state, args.params, up)
                     if (!running.ended) {
                         running.abort();
                     }

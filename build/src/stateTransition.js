@@ -232,12 +232,11 @@ function $StateTransitionProvider() {
     * Instead of using this method, the transitions can also be configured when defining states through the {@link dotjem.routing.$stateProvider $stateProvider}.
     */
     this.onEnter = function (state, handler) {
-        //TODO: Validation
-        if (isObject(handler)) {
+        if (isInjectable(handler)) {
+            this.transition('*', state, handler);
+        } else if (isObject(handler)) {
             var aligned = alignHandler(handler);
             this.transition(aligned.from || '*', state, aligned.handler);
-        } else if (isFunction(handler) || isArray(handler)) {
-            this.transition('*', state, handler);
         }
     };
 
@@ -262,11 +261,11 @@ function $StateTransitionProvider() {
     * Instead of using this method, the transitions can also be configured when defining states through the {@link dotjem.routing.$stateProvider $stateProvider}.
     */
     this.onExit = function (state, handler) {
-        if (isObject(handler)) {
+        if (isInjectable(handler)) {
+            this.transition(state, '*', handler);
+        } else if (isObject(handler)) {
             var aligned = alignHandler(handler);
             this.transition(state, aligned.to || '*', aligned.handler);
-        } else if (isFunction(handler) || isArray(handler)) {
-            this.transition(state, '*', handler);
         }
     };
 
@@ -377,7 +376,7 @@ function $StateTransitionProvider() {
             return $transition;
 
             function find(from, to) {
-                var transitions = findTransitions(toName(from)), handlers = extractHandlers(transitions, toName(to)), emitters;
+                var transitions = findTransitions(toName(from)), handlers = extractHandlers(transitions, toName(to));
 
                 function emit(select, tc, trx) {
                     var handler;

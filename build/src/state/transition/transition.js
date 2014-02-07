@@ -1,5 +1,16 @@
 /// <reference path="../../refs.d.ts" />
 
+//var trx = {
+//    locals: context.locals,
+//    canceled: false,
+//    cancel: function () {
+//        trx.canceled = true;
+//    },
+//    goto: function (state, params?) {
+//        trx.canceled = true;
+//        gotofn({ state: state, params: { all: params }, updateroute: true });
+//    }
+//};
 //TODO: stateTransition.create should be surfice for the factory.
 var Factory = (function () {
     function Factory(inject, q) {
@@ -11,7 +22,7 @@ var Factory = (function () {
         var trans = new Transition(state, params, updateroute);
         forEach(this.factories, function (fac) {
             //TODO: Use injection.
-            var stage = null;
+            //var stage = null;
             trans.push(fac());
         });
         return trans;

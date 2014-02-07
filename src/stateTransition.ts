@@ -181,6 +181,7 @@
 function $StateTransitionProvider() {
     'use strict';
     var root = { children: {}, targets: {} },
+        //Note: Do not remove
         _this = this;
 
     function alignHandler(obj) {
@@ -234,12 +235,11 @@ function $StateTransitionProvider() {
      * Instead of using this method, the transitions can also be configured when defining states through the {@link dotjem.routing.$stateProvider $stateProvider}.
      */
     this.onEnter = function (state: any, handler) {
-        //TODO: Validation
-        if (isObject(handler)) {
+        if (isInjectable(handler)) {
+            this.transition('*', state, handler);
+        } else if (isObject(handler)) {
             var aligned = alignHandler(handler);
             this.transition(aligned.from || '*', state, aligned.handler);
-        } else if (isFunction(handler) || isArray(handler)) {
-            this.transition('*', state, handler);
         }
     };
 
@@ -264,11 +264,11 @@ function $StateTransitionProvider() {
      * Instead of using this method, the transitions can also be configured when defining states through the {@link dotjem.routing.$stateProvider $stateProvider}.
      */
     this.onExit = function (state: any, handler) {
-        if (isObject(handler)) {
+        if (isInjectable(handler)) {
+            this.transition(state, '*', handler);
+        } else if (isObject(handler)) {
             var aligned = alignHandler(handler);
             this.transition(state, aligned.to || '*', aligned.handler);
-        } else if (isFunction(handler) || isArray(handler)) {
-            this.transition(state, '*', handler);
         }
     };
 
@@ -317,7 +317,7 @@ function $StateTransitionProvider() {
 
             validate(from, to);
 
-            if (isInjectable(handler)) { // angular.isFunction(handler) || angular.isArray(handler)) {
+            if (isInjectable(handler)) { 
                 handler = { between: handler };
             }
 

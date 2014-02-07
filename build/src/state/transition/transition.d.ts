@@ -15,6 +15,13 @@ interface IStageFactory {
 interface IFactory {
     create(state: any, params: any, updateroute?: boolean): ITransition;
 }
+interface IStateTransition {
+    locals: any;
+    canceled: boolean;
+    cancelReason: any;
+    cancel: (reason?: any) => void;
+    goto: (state: any, params?: any) => void;
+}
 declare class Factory implements IFactory {
     public inject: ng.auto.IInjectorService;
     private q;
